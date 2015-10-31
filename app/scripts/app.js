@@ -10,10 +10,21 @@ blocJamsModule.config(function($stateProvider, $locationProvider){
     });
     
     // defining the necessary states and their aspects 
-    $stateProvider.state('album', {
-        url: '/album',
-        controller: 'Album.controller',
-        templateUrl: '/templates/album.html'
+    $stateProvider
+        .state('album', {
+            url: '/album',
+            controller: 'Album.controller',
+            templateUrl: '/templates/album.html'
+        })
+        .state('landing',{
+            url: '/landing',
+            controller: 'Landing.controller',
+            templateUrl: '/templates/landing.html'
+        })
+        .state('collection',{
+            url: '/collection',
+            controller: 'Collection.controller',
+            templateUrl: '/templates/collection.html'    
+        });
     
-    });
 });

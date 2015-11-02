@@ -10,8 +10,8 @@
         </div>
     </section>
     <table class="album-view-song-list" ng-repeat="song in songs">
-        <tr class="album-view-song-item">'
-            <td class="song-item-number" data-song-number="' + {{ songs.indexOf(song)+1 }} + '">{{ songs.indexOf(song)+1 }} </td>
+        <tr class="album-view-song-item"  ng-mouseenter="showPlayButton()" ng-mouseleave="hidePlayButton()" ng-click="playPauseSong()">'
+            <td class="song-item-number" data-song-number="' + {{ songs.indexOf(song)+1 }} + '">{{ cellContent }}</td>
             <td class="song-item-title">{{ song.name }}</td>
             <td class="song-item-duration">{{ song.length }}</td>
         </tr>
@@ -22,13 +22,13 @@
     <div class="player-bar">
         <div class="container">
             <div class="control-group main-controls">
-                <a class="previous">
+                <a class="previous" ng-click="playPreviousSong()">
                     <span class="ion-skip-backward"></span>
                 </a>
-                <a class="play-pause">
+                <a class="play-pause" ng-click="playPauseSong()">
                     <span class="ion-play"></span>
                 </a>
-                <a class="next">
+                <a class="next" ng-click="playNextSong()">
                     <span class="ion-skip-forward"></span>
                 </a>
             </div>

@@ -11,21 +11,25 @@
     <link rel="stylesheet" type="text/css" href="/styles/landing.css">
     <link rel="stylesheet" type="text/css" href="/styles/collection.css">
     <link rel="stylesheet" type="text/css" href="/styles/album.css">
+    <link rel="stylesheet" type="text/css" href="/styles/player_bar.css">
 </head>
 <body class="landing">
     
     <nav class="navbar"><!-- navigation bar -->
-        <a href="index.html" class="logo">
-            <img src="assets/images/bloc_jams_logo.png" alt="bloc jams logo" class="logo">
+        <a ui-sref="landing" class="logo">
+            <img ng-src="assets/images/bloc_jams_logo.png" alt="bloc jams angular logo" class="logo">
         </a>
         <div class="links-container">
             <a ui-sref="collection" class="navbar-link">Collection</a>
         </div>
     </nav>
     
+    <data-ui-view></data-ui-view>
+    
     
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+    <script src="/scripts/fixtures.js"></script>
     <script src="/scripts/app.js"></script>
     
 </body>

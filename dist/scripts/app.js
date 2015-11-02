@@ -13,18 +13,48 @@ blocJamsModule.config(function($stateProvider, $locationProvider){
     $stateProvider
         .state('album', {
             url: '/album',
-            controller: 'Album.controller',
+            controller: 'AlbumController',
             templateUrl: '/templates/album.html'
         })
         .state('landing',{
             url: '/landing',
-            controller: 'Landing.controller',
+            controller: 'LandingController',
             templateUrl: '/templates/landing.html'
         })
         .state('collection',{
             url: '/collection',
-            controller: 'Collection.controller',
+            controller: 'CollectionController',
             templateUrl: '/templates/collection.html'    
         });
     
 });
+
+
+blocJamsModule.controller('LandingController', ['$scope',function($scope){
+    $scope.tagline = "Turn the music up!";
+}]);
+
+blocJamsModule.controller('CollectionController', ['$scope', function($scope){
+    $scope.albumList = [albumPicasso, albumMarconi];
+    for ( var i = 0; i <= 4; i++ ) {
+        $scope.albumList.push(angular.copy(albumPicasso));
+        $scope.albumList.push(angular.copy(albumMarconi));
+    } 
+}]);
+
+blocJamsModule.controller('AlbumController', ['$scope', function($scope){
+    $scope.name = albumPicasso.name;
+    $scope.artist = albumPicasso.artist;
+    $scope.yearLabel = albumPicasso.year + " " + albumPicasso.label;
+    $scope.albumArtUrl = albumPicasso.albumArtUrl;
+    $scope.songs = albumPicasso.songs;
+    
+}]);
+    
+
+
+
+
+
+
+

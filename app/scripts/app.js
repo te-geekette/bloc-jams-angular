@@ -41,30 +41,47 @@ blocJamsModule.controller('CollectionController', ['$scope', function($scope){
     } 
 }]);
 
-blocJamsModule.controller('AlbumController', ['$scope', 'SongNumberCell' ,'SongPlayer', function($scope, SongPlayer, SongNumberCell){
+blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', function($scope, SongPlayer){
     $scope.name = albumPicasso.name;
     $scope.artist = albumPicasso.artist;
     $scope.yearLabel = albumPicasso.year + " " + albumPicasso.label;
     $scope.albumArtUrl = albumPicasso.albumArtUrl;
     $scope.songs = albumPicasso.songs;
     
+    $scope.showNumber = true;
+    $scope.showPlay = false;
+    $scope.showPause = false; 
+    
+    
+    
     
     // Two functions to show the playButton when user hovers over a row
     // TODO: Check if song is already playing > don't hide playButton
     
     $scope.showPlayButton = function(){
-        SongNumberCell.cellContent = '<a class="album-song-button"><span class="ion-play"></span></a>'; 
+        if(this.showPause == !true) {
+            this.showNumber = false;
+            this.showPlay = true; 
+        }
     };
+    
     $scope.hidePlayButton = function(){
-        SongNumberCell.cellContent = 'songs.length(song)';
-
+        if(this.showPause == !true) {
+            this.showNumber = true;
+            this.showPlay = false; 
+        }
     };
     
     // TODO: One function to play the song when user clicks on a row 
     // Note: playPauseSonge should also change the play button in the player bar 
-    $scope.playPauseSong = function(){
-        SongNumberCell.cellContent = '<a class="album-song-button"><span class="ion-pause"></span></a>';
+    $scope.playPauseSong = function(song){
+        var songNumber = $scope.songs.indexOf(song)+1;
 
+        SongPlayer.play(songNumber, $scope.showNumber, $scope.showPlay, $scope.showPause);
+        
+//        this.showNumber = false;
+//        this.showPlay = false; 
+//        this.showPause = true;
         
     };
     

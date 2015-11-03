@@ -1,24 +1,89 @@
 var blocJamsServices = angular.module('blocJamsServices', []);
 
-blocJamsServices.service('SongNumberCell', function(){
+blocJamsServices.service('PlayerVariables', function(){
     return {
-        cellContent: ""
+        currentlyPlayingSongNumber: null,
+        currentAlbum: albumPicasso,
+        currentSongFromAlbum: null,
+        currentSoundFile: null,
+        currentVolume: 80
     }
-});                        
-                         
-blocJamsServices.service('SongPlayer', [function(){
+}); 
+
+//blocJamsServices.service('SetSong', function(songNumber){
+//    if (currentSoundFile){
+//        currentSoundFile.stop();
+//    }
+//    PlayerVariables.currentlyPlayingSongNumber = songNumber;
+//    currentSongFromAlbum = currentAlbum.songs[songNumber -1];
+//    currentSoundFile = new buzz.sound(currentSongFromAlbum.audioUrl, {
+//        formats: ['mp3'],
+//        preload: true,
+//        });
+////    setVolume(currentVolume);
+//});
+//      
+
+blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariables, SetSong){
     return {
-        play: function(){
-            
+        
+        setSong: function(songNumber){
+            if (PlayerVariables.currentSoundFile){
+                PlayerVariables.currentSoundFile.stop();
+                }
+            PlayerVariables.currentlyPlayingSongNumber = songNumber;
+            PlayerVariables.currentSongFromAlbum = PlayerVariables.currentAlbum.songs[songNumber -1];
+            PlayerVariables.currentSoundFile = new buzz.sound(PlayerVariables.currentSongFromAlbum.audioUrl, {
+                formats: ['mp3'],
+                preload: true,
+            });
+            console.log("Juhu");
         },
         
-//        play: function() {
-//            this.playing = true;
-//            currentSoundFile.play(); 
-//        }
+        play: function(songNumber, showNumber, showPlay, showPause){
+            // no song has started yet
+            if (PlayerVariables.currentlyPlayingSongNumber == null){ 
+                console.log('No song playing');
+                console.log(songNumber);
+                this.setSong(songNumber);
+                
+                // this doesn't work ....
+                showNumber = false;
+                showPlay = false; 
+                showPause = true;
+                
+            // the musik is playing but it's not the clicked song 
+            } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber){
+                console.log('Different song playing');
+                
+                PlayerVariables.currentlyPlayingSongNumber = songNumber;
+                console.log(PlayerVariables.currentlyPlayingSongNumber);
+        
+            // the music should stop since the playing song was clicked
+            } else if (PlayerVariables.currentlyPlayingSongNumber == songNumber) {
+                console.log('This song playing');
+        
+            } else {
+                console.log('Whatever');
+            }
+        }
     }
 }]);
 
+
+//var setSong = function(songNumber){
+//    if (currentSoundFile){
+//        currentSoundFile.stop();
+//    }
+//    currentlyPlayingSongNumber = parseInt(songNumber);
+//    currentSongFromAlbum = currentAlbum.songs[songNumber -1];
+//    currentSoundFile = new buzz.sound(currentSongFromAlbum.audioUrl, {
+//        formats: ['mp3'],
+//        preload: true,
+//    });
+//    setVolume(currentVolume);
+//};
+//
 
 
 

@@ -41,7 +41,8 @@ blocJamsModule.controller('CollectionController', ['$scope', function($scope){
     } 
 }]);
 
-blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', function($scope, SongPlayer){
+blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVariables', function($scope, SongPlayer, PlayerVariables){
+    
     $scope.name = albumPicasso.name;
     $scope.artist = albumPicasso.artist;
     $scope.yearLabel = albumPicasso.year + " " + albumPicasso.label;
@@ -52,36 +53,50 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', function($
     $scope.showPlay = false;
     $scope.showPause = false; 
     
-    
-    
-    
     // Two functions to show the playButton when user hovers over a row
-    // TODO: Check if song is already playing > don't hide playButton
-    
     $scope.showPlayButton = function(){
         if(this.showPause == !true) {
             this.showNumber = false;
-            this.showPlay = true; 
-        }
+            this.showPlay = true;   }
     };
     
     $scope.hidePlayButton = function(){
         if(this.showPause == !true) {
             this.showNumber = true;
-            this.showPlay = false; 
-        }
+            this.showPlay = false;  }
     };
     
-    // TODO: One function to play the song when user clicks on a row 
-    // Note: playPauseSonge should also change the play button in the player bar 
+    // One function to play the song when user clicks a play button in the rows
     $scope.playPauseSong = function(song){
         var songNumber = $scope.songs.indexOf(song)+1;
-
-        SongPlayer.play(songNumber, $scope.showNumber, $scope.showPlay, $scope.showPause);
         
-//        this.showNumber = false;
-//        this.showPlay = false; 
-//        this.showPause = true;
+        if (PlayerVariables.currentlyPlayingSongNumber == null){
+            SongPlayer.play(songNumber);
+            this.showNumber = false;
+            this.showPlay = false; 
+            this.showPause = true;
+            
+        } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber) {
+            SongPlayer.play(songNumber);
+            
+            // PROBLEM: How do I get rid of the previously clicked Play-Button????
+            this.showNumber = false;
+            this.showPlay = false;
+            this.showPause = true;
+            
+        } else if (PlayerVariables.currentlyPlayingSongNumber == songNumber) {
+            if(PlayerVariables.currentSoundFile.isPaused()){
+                SongPlayer.play(songNumber);
+                this.showPause = true;
+                this.showPlay = false; 
+            } else {
+                SongPlayer.pause();
+                this.showPlay = true; 
+                this.showPause = false;
+            }
+        }
+        
+
         
     };
     
@@ -89,7 +104,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', function($
     $scope.playPreviousSong = function(){};
     $scope.playNextSong = function(){};
     
-    // ToDo: Two functions to update the time bar and the volume bar
+    // ToDo: Functions to update the time bar and the volume bar
     
 }]);
     

@@ -8,21 +8,7 @@ blocJamsServices.service('PlayerVariables', function(){
         currentSoundFile: null,
         currentVolume: 80
     }
-}); 
-
-//blocJamsServices.service('SetSong', function(songNumber){
-//    if (currentSoundFile){
-//        currentSoundFile.stop();
-//    }
-//    PlayerVariables.currentlyPlayingSongNumber = songNumber;
-//    currentSongFromAlbum = currentAlbum.songs[songNumber -1];
-//    currentSoundFile = new buzz.sound(currentSongFromAlbum.audioUrl, {
-//        formats: ['mp3'],
-//        preload: true,
-//        });
-////    setVolume(currentVolume);
-//});
-//      
+});   
 
 blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariables, SetSong){
     return {
@@ -37,53 +23,20 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
                 formats: ['mp3'],
                 preload: true,
             });
-            console.log("Juhu");
+//          setVolume(currentVolume);
         },
         
-        play: function(songNumber, showNumber, showPlay, showPause){
-            // no song has started yet
-            if (PlayerVariables.currentlyPlayingSongNumber == null){ 
-                console.log('No song playing');
-                console.log(songNumber);
-                this.setSong(songNumber);
-                
-                // this doesn't work ....
-                showNumber = false;
-                showPlay = false; 
-                showPause = true;
-                
-            // the musik is playing but it's not the clicked song 
-            } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber){
-                console.log('Different song playing');
-                
-                PlayerVariables.currentlyPlayingSongNumber = songNumber;
-                console.log(PlayerVariables.currentlyPlayingSongNumber);
+        play: function(songNumber){
+            this.setSong(songNumber);
+            PlayerVariables.currentSoundFile.play();
+        },
         
-            // the music should stop since the playing song was clicked
-            } else if (PlayerVariables.currentlyPlayingSongNumber == songNumber) {
-                console.log('This song playing');
-        
-            } else {
-                console.log('Whatever');
-            }
+        pause: function(){
+            PlayerVariables.currentSoundFile.pause();
         }
     }
 }]);
 
-
-//var setSong = function(songNumber){
-//    if (currentSoundFile){
-//        currentSoundFile.stop();
-//    }
-//    currentlyPlayingSongNumber = parseInt(songNumber);
-//    currentSongFromAlbum = currentAlbum.songs[songNumber -1];
-//    currentSoundFile = new buzz.sound(currentSongFromAlbum.audioUrl, {
-//        formats: ['mp3'],
-//        preload: true,
-//    });
-//    setVolume(currentVolume);
-//};
-//
 
 
 
@@ -108,6 +61,7 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
 //            $(this).html(pauseButtonTemplate);
 //            setSong($songNumber);
 //            currentSoundFile.play();
+
 //            updateSeekBarWhileSongPlays();
 //            $('.volume .fill').css({width: currentVolume +'%'});
 //            $('.volume .thumb').css({left: currentVolume +'%'});
@@ -130,11 +84,13 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
 //        } else if (currentlyPlayingSongNumber == $songNumber) {
 //            if(currentSoundFile.isPaused()){
 //                currentSoundFile.play();
+
 //                updateSeekBarWhileSongPlays();
 //                $(this).html(pauseButtonTemplate);
 //                $('.main-controls .play-pause').html(playerBarPauseButton);
 //            } else {
-//                currentSoundFile.pause(); 
+//                currentSoundFile.pause();
+
 //                $(this).html(playButtonTemplate);
 //                $('.main-controls .play-pause').html(playerBarPlayButton);
 //            }

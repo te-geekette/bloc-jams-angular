@@ -43,22 +43,13 @@ blocJamsModule.controller('CollectionController', ['$scope', function($scope){
 
 blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVariables', function($scope, SongPlayer, PlayerVariables){
     
-    // Side question related to Question 2-3: How would I build a service that could pass the information which album was clicked in collection into this controller? 
     $scope.name = albumPicasso.name;
     $scope.artist = albumPicasso.artist;
     $scope.yearLabel = albumPicasso.year + " " + albumPicasso.label;
     $scope.albumArtUrl = albumPicasso.albumArtUrl;
     $scope.songs = albumPicasso.songs;
-    $scope.currentSongName = null;
-    $scope.currentSongNameMobile = null;
     
-    // QUESTION 1-3: Why are these not updated when currentTime and totalTime are updated in their service? 
-    $scope.currentTime = PlayerVariables.currentTime;
-    $scope.totalTime = PlayerVariables.totalTime;
-    
-    $scope.showNumber = true;
-    $scope.showPlay = false;
-    $scope.showPause = false; 
+    $scope.PlayerVariables = PlayerVariables;
     
     $scope.showPauseInBar = false;
     $scope.togglePlayButtonInBar = function(){
@@ -72,51 +63,48 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
     };
     
     // Two functions to show the playButton when user hovers over a row
-    $scope.showPlayButton = function(){
-        if(this.showPause == !true) {
-            this.showNumber = false;
-            this.showPlay = true;   }
+    $scope.showPlayButton = function(song){
+        if(song.showPause == !true) {
+            song.showNumber = false;
+            song.showPlay = true;   }
     };
     
-    $scope.hidePlayButton = function(){
-        if(this.showPause == !true) {
-            this.showNumber = true;
-            this.showPlay = false;  }
+    $scope.hidePlayButton = function(song){
+        if(song.showPause == !true) {
+            song.showNumber = true;
+            song.showPlay = false;  }
     };
     
     // One function to play the song when user clicks a play button in the rows
     $scope.playPauseSong = function(song){
-        var songNumber = $scope.songs.indexOf(song)+1;
         
-        if (PlayerVariables.currentlyPlayingSongNumber == null){
-            SongPlayer.play(songNumber);      
-            this.showNumber = false;
-            this.showPlay = false; 
-            this.showPause = true;
+        var songNumber = $scope.songs.indexOf(song)+1;
 
-            $scope.updatePlayerBarSong();
-            
+        if (PlayerVariables.currentlyPlayingSongNumber == null){
+            SongPlayer.play(songNumber);
+            song.showNumber = false;
+            song.showPlay = false; 
+            song.showPause = true;
+ 
         } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber) {
             SongPlayer.play(songNumber);
+            $scope.songs[PlayerVariables.previousSongNumber-1].showNumber = true;
+            $scope.songs[PlayerVariables.previousSongNumber-1].showPlay = false;
+            $scope.songs[PlayerVariables.previousSongNumber-1].showPause = false;
             
-            // QUESTION 2-3: How do I get rid of the previously clicked Pause-Button????
-            // GENERAL Question: How do I use ng-show for a specific element that was part of ng-repeat?
-            this.showNumber = false;
-            this.showPlay = false;
-            this.showPause = true;
+            song.showNumber = false;
+            song.showPlay = false;
+            song.showPause = true;
 
-            $scope.updatePlayerBarSong();
-            
         } else if (PlayerVariables.currentlyPlayingSongNumber == songNumber) {
             if(PlayerVariables.currentSoundFile.isPaused()){
                 SongPlayer.play(songNumber);
-                this.showPause = true;
-                this.showPlay = false; 
-                $scope.updatePlayerBarSong();
+                song.showPause = true;
+                song.showPlay = false; 
             } else {
                 SongPlayer.pause();
-                this.showPlay = true; 
-                this.showPause = false;
+                song.showPlay = true; 
+                song.showPause = false;
             }
         }
     };
@@ -125,31 +113,30 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         
         if (PlayerVariables.currentSongFromAlbum === null) {
             SongPlayer.play(1);
-            $scope.updatePlayerBarSong();
-//          getSongNumberCell(currentlyPlayingSongNumber).html(pauseButtonTemplate);            
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showNumber = false;
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = false;
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = true;
+            
             SongPlayer.updateSeekBarWhileSongPlays();            
             
         } else if (PlayerVariables.currentSoundFile.isPaused()) {
             SongPlayer.play(PlayerVariables.currentlyPlayingSongNumber);
-            $scope.updatePlayerBarSong();
-//          getSongNumberCell(currentlyPlayingSongNumber).html(pauseButtonTemplate); 
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showNumber = false;
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = false;
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = true;
             
         } else if (PlayerVariables.currentSoundFile) {
             SongPlayer.pause(PlayerVariables.currentlyPlayingSongNumber);
-            $scope.updatePlayerBarSong();
-//          getSongNumberCell(currentlyPlayingSongNumber).html(playButtonTemplate);
-            
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showNumber = false;
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = true;
+            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = false;            
         }
         $scope.togglePlayButtonInBar();
     };
-    
-    $scope.updatePlayerBarSong = function(){
-            $scope.currentSongName = PlayerVariables.currentSongFromAlbum.name;
-            $scope.currentSongNameMobile = PlayerVariables.currentSongFromAlbum.name + " " + $scope.artist;
-    };
-    
+  
     // Two functions for the previous and next buttons
     $scope.playPreviousSong = function(){
+        
         if(PlayerVariables.currentlyPlayingSongNumber === 1) {
             var previousSongNumber = $scope.songs.length;
         } else if (!PlayerVariables.currentlyPlayingSongNumber) {
@@ -159,18 +146,20 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         }
         
         // Set the last song back to it's song number
-//      oldCurrentSongNumberCell.html(currentlyPlayingSongNumber);
+        if(PlayerVariables.previousSongNumber){
+            $scope.songs[PlayerVariables.previousSongNumber -1].showNumber = true;
+            $scope.songs[PlayerVariables.previousSongNumber -1].showPlay = false;
+            $scope.songs[PlayerVariables.previousSongNumber -1].showPause = false;
+        }
         
         // Update the current song variables
         SongPlayer.play(previousSongNumber);
         SongPlayer.updateSeekBarWhileSongPlays();
         
         // Set the play button for the previous song
-//      var nextSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
-//      nextSongNumberCell.html(pauseButtonTemplate);
-        
-        // Update the player
-        $scope.updatePlayerBarSong();
+        $scope.songs[previousSongNumber-1].showNumber = false;
+        $scope.songs[previousSongNumber-1].showPlay = false;
+        $scope.songs[previousSongNumber-1].showPause = true;
     
     };
 
@@ -181,18 +170,19 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
             var nextSongNumber = 1; 
         }
         // Set the last song back to it's song number
-//      oldCurrentSongNumberCell.html(currentlyPlayingSongNumber);
-        
+        if(PlayerVariables.previousSongNumber){
+            $scope.songs[PlayerVariables.previousSongNumber -1].showNumber = true;
+            $scope.songs[PlayerVariables.previousSongNumber -1].showPlay = false;
+            $scope.songs[PlayerVariables.previousSongNumber -1].showPause = false;
+        }
         // Update the current song variables
-        SongPlayer.play(nextSongNumber);
-        SongPlayer.updateSeekBarWhileSongPlays();
+        SongPlayer.play(nextSongNumber);        
         
         // Set the play button for the next song
-//      var nextSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
-//      nextSongNumberCell.html(pauseButtonTemplate);
-        
-        // Update the player
-        $scope.updatePlayerBarSong();
+        $scope.songs[nextSongNumber-1].showNumber = false;
+        $scope.songs[nextSongNumber-1].showPlay = false;
+        $scope.songs[nextSongNumber-1].showPause = true;
+
     };
  
     // Assignment 6: Functions to update the seek bars 

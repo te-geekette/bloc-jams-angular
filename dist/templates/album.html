@@ -10,10 +10,10 @@
         </div>
     </section>
     <table class="album-view-song-list" ng-repeat="song in songs">
-        <tr class="album-view-song-item"  ng-mouseenter="showPlayButton()" ng-mouseleave="hidePlayButton()" >
-            <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="showNumber" data-song-number="' + {{ songs.indexOf(song)+1 }} + '">{{ $index +1 }}</td>
-            <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="showPlay" data-song-number="' + {{ songs.indexOf(song)+1 }} + '"><a class="album-song-button"><span class="ion-play"></span></a></td>
-            <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="showPause" data-song-number="' + {{ songs.indexOf(song)+1 }} + '"><a class="album-song-button"><span class="ion-pause"></span></a></td>
+        <tr class="album-view-song-item"  ng-mouseenter="showPlayButton(song)" ng-mouseleave="hidePlayButton(song)" >
+            <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="song.showNumber" data-song-number="' + {{ songs.indexOf(song)+1 }} + '">{{ $index +1 }}</td>
+            <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="song.showPlay" data-song-number="' + {{ songs.indexOf(song)+1 }} + '"><a class="album-song-button"><span class="ion-play"></span></a></td>
+            <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="song.showPause" data-song-number="' + {{ songs.indexOf(song)+1 }} + '"><a class="album-song-button"><span class="ion-pause"></span></a></td>
             <td class="song-item-title">{{ song.name }}</td>
             <td class="song-item-duration">{{ song.length }}</td>
         </tr>
@@ -36,16 +36,16 @@
                 </a>
             </div>
             <div class="control-group currently-playing">
-                <h2 class="song-name">{{ currentSongName }}</h2>
-                <h2 class="artist-song-mobile">{{ currentSongNameMobile }}</h2>
-                <h3 class="artist-name">{{ artist }}</h3>
+                <h2 class="song-name">{{ PlayerVariables.currentSongFromAlbum.name }}</h2>
+                <h2 class="artist-song-mobile">{{ PlayerVariables.currentSongFromAlbum.name + " " + artist; }}</h2>
+                <h3 class="artist-name">{{ PlayerVariables.currentAlbum.artist }}</h3>
                 <div class="seek-control">
                     <div class="seek-bar">
                         <div class="fill"></div>
                         <div class="thumb"></div>
                     </div>
-                    <div class="current-time">{{ currentTime }}</div>
-                    <div class="total-time">{{ totalTime }}</div>
+                    <div class="current-time">{{ PlayerVariables.currentTime }}</div>
+                    <div class="total-time">{{ PlayerVariables.totalTime }}</div>
                 </div>
             </div>
             <div class="control-group volume">

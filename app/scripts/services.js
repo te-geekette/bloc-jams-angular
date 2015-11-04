@@ -19,9 +19,9 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
         setSong: function(songNumber){
             if (PlayerVariables.currentSoundFile){
                 PlayerVariables.currentSoundFile.stop();
-                PlayerVariables.previousSongNumber = PlayerVariables.currentlyPlayingSongNumber;
                 }
             PlayerVariables.currentlyPlayingSongNumber = songNumber;
+            PlayerVariables.previousSongNumber = PlayerVariables.currentlyPlayingSongNumber;
             PlayerVariables.currentSongFromAlbum = PlayerVariables.currentAlbum.songs[songNumber -1];
             PlayerVariables.currentSoundFile = new buzz.sound(PlayerVariables.currentSongFromAlbum.audioUrl, {
                 formats: ['mp3'],
@@ -44,45 +44,32 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
         
         play: function(songNumber){
             this.setSong(songNumber);
-            PlayerVariables.currentSoundFile.play();
             this.updateSeekBarWhileSongPlays();
+            PlayerVariables.currentSoundFile.play();
+            
         },
         
         pause: function(){
             PlayerVariables.currentSoundFile.pause();
         },
         
-        // QUESTION 3-3: getTime() is not updating while the song is playing and getDuration() doesn't show anything 
-        // But If I bind it (as done in BlocJams) then the data of the first song is not shown.
         updateSeekBarWhileSongPlays: function(){
             if(PlayerVariables.currentSoundFile){
-                var seekBarFillRatio = PlayerVariables.currentSoundFile.getTime() / PlayerVariables.currentSoundFile.getDuration();
-//              updateSeekPercentage($seekBar, seekBarFillRatio);
-                PlayerVariables.currentTime = buzz.toTimer(PlayerVariables.currentSoundFile.getTime());
-                PlayerVariables.totalTime = buzz.toTimer(PlayerVariables.currentSoundFile.getDuration());
+                PlayerVariables.currentSoundFile.bind('timeupdate', function(event){
+                    var seekBarFillRatio = this.getTime() / this.getDuration();
+//                  updateSeekPercentage($seekBar, seekBarFillRatio);
+                    PlayerVariables.currentTime = buzz.toTimer(this.getTime());
+                    PlayerVariables.totalTime = buzz.toTimer(this.getDuration());
+                    console.log(PlayerVariables.totalTime);
+                });
             }            
         }
     }
 }]);
 
-
 /////////////////
 
 
-
-
-//var updateSeekBarWhileSongPlays = function(){
-//    if (currentSoundFile) {
-//        currentSoundFile.bind('timeupdate', function(event) {
-//            var seekBarFillRatio = this.getTime() / this.getDuration();
-//            var $seekBar = $('.seek-control .seek-bar');
-//            updateSeekPercentage($seekBar, seekBarFillRatio);
-//            setCurrentTimeInPlayerBar( buzz.toTimer(this.getTime()) );
-//            setTotalTimeInPlayerBar( buzz.toTimer(this.getDuration()) )
-//         });
-//     }
-//};
-//
 //var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
 //    var offsetXPercent = seekBarFillRatio * 100;
 //

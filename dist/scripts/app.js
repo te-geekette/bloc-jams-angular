@@ -43,6 +43,7 @@ blocJamsModule.controller('CollectionController', ['$scope', function($scope){
 
 blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVariables', function($scope, SongPlayer, PlayerVariables){
     
+    // Side question related to Question 2-3: How would I build a service that could pass the information which album was clicked in collection into this controller? 
     $scope.name = albumPicasso.name;
     $scope.artist = albumPicasso.artist;
     $scope.yearLabel = albumPicasso.year + " " + albumPicasso.label;
@@ -51,15 +52,24 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
     $scope.currentSongName = null;
     $scope.currentSongNameMobile = null;
     
-    // Problem: Why are these not updated when currentTime and socialTime are updated in their service? 
+    // QUESTION 1-3: Why are these not updated when currentTime and totalTime are updated in their service? 
     $scope.currentTime = PlayerVariables.currentTime;
     $scope.totalTime = PlayerVariables.totalTime;
     
     $scope.showNumber = true;
     $scope.showPlay = false;
     $scope.showPause = false; 
-    $scope.showPlayInBar = true;
+    
     $scope.showPauseInBar = false;
+    $scope.togglePlayButtonInBar = function(){
+        if (PlayerVariables.currentSoundFile && PlayerVariables.currentSoundFile.isPaused() === false){
+            $scope.showPauseInBar = true;
+            return false;
+        } else {
+            $scope.showPauseInBar = false;
+            return true; 
+        }
+    };
     
     // Two functions to show the playButton when user hovers over a row
     $scope.showPlayButton = function(){
@@ -89,7 +99,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber) {
             SongPlayer.play(songNumber);
             
-            // PROBLEM: How do I get rid of the previously clicked Pause-Button????
+            // QUESTION 2-3: How do I get rid of the previously clicked Pause-Button????
             // GENERAL Question: How do I use ng-show for a specific element that was part of ng-repeat?
             this.showNumber = false;
             this.showPlay = false;
@@ -117,7 +127,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
             SongPlayer.play(1);
             $scope.updatePlayerBarSong();
 //          getSongNumberCell(currentlyPlayingSongNumber).html(pauseButtonTemplate);            
-//          updateSeekBarWhileSongPlays();            
+            SongPlayer.updateSeekBarWhileSongPlays();            
             
         } else if (PlayerVariables.currentSoundFile.isPaused()) {
             SongPlayer.play(PlayerVariables.currentlyPlayingSongNumber);
@@ -130,17 +140,15 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
 //          getSongNumberCell(currentlyPlayingSongNumber).html(playButtonTemplate);
             
         }
+        $scope.togglePlayButtonInBar();
     };
     
     $scope.updatePlayerBarSong = function(){
             $scope.currentSongName = PlayerVariables.currentSongFromAlbum.name;
             $scope.currentSongNameMobile = PlayerVariables.currentSongFromAlbum.name + " " + $scope.artist;
-            // Problem 2: Why is this not working? I get no affect at all on the play button in the bar. 
-            $scope.showPauseInBar = true ? false: true;    
-            $scope.showPlayInBar = false ? true: false;
     };
     
-    // ToDo: Two functions for the previous and next buttons
+    // Two functions for the previous and next buttons
     $scope.playPreviousSong = function(){
         if(PlayerVariables.currentlyPlayingSongNumber === 1) {
             var previousSongNumber = $scope.songs.length;
@@ -155,7 +163,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         
         // Update the current song variables
         SongPlayer.play(previousSongNumber);
-//      updateSeekBarWhileSongPlays();
+        SongPlayer.updateSeekBarWhileSongPlays();
         
         // Set the play button for the previous song
 //      var nextSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
@@ -177,7 +185,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         
         // Update the current song variables
         SongPlayer.play(nextSongNumber);
-//      updateSeekBarWhileSongPlays();
+        SongPlayer.updateSeekBarWhileSongPlays();
         
         // Set the play button for the next song
 //      var nextSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
@@ -187,7 +195,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         $scope.updatePlayerBarSong();
     };
  
-    // Assignment 6: Functions to update the time bar and the volume bar
+    // Assignment 6: Functions to update the seek bars 
     
 }]);
     

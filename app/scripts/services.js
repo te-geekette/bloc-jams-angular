@@ -52,15 +52,14 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
             PlayerVariables.currentSoundFile.pause();
         },
         
+        // QUESTION 3-3: getTime() is not updating while the song is playing and getDuration() doesn't show anything 
+        // But If I bind it (as done in BlocJams) then the data of the first song is not shown.
         updateSeekBarWhileSongPlays: function(){
             if(PlayerVariables.currentSoundFile){
-                PlayerVariables.currentSoundFile.bind('timeupdate',function(event){
-                    var seekBarFillRatio = this.getTime() / this.getDuration();
-//                  updateSeekPercentage($seekBar, seekBarFillRatio);
-                    PlayerVariables.currentTime = buzz.toTimer(this.getTime());
-                    PlayerVariables.totalTime = buzz.toTimer(this.getDuration());
-                });
-
+                var seekBarFillRatio = PlayerVariables.currentSoundFile.getTime() / PlayerVariables.currentSoundFile.getDuration();
+//              updateSeekPercentage($seekBar, seekBarFillRatio);
+                PlayerVariables.currentTime = buzz.toTimer(PlayerVariables.currentSoundFile.getTime());
+                PlayerVariables.totalTime = buzz.toTimer(PlayerVariables.currentSoundFile.getDuration());
             }            
         }
     }
@@ -136,14 +135,7 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
 //        });
 //    });
 //};
-//
-//var setCurrentTimeInPlayerBar = function(currentTime){ 
-//    $('.current-time').html(currentTime); 
-//};
-//
-//var setTotalTimeInPlayerBar = function(totalTime){
-//    $('.total-time').html(totalTime);
-//};
+
 //
 //var filterTimeCode = function(timeInSeconds){
 //    var float = parseFloat(timeInSeconds, 10);

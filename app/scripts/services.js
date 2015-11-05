@@ -9,7 +9,8 @@ blocJamsServices.service('PlayerVariables', function(){
         currentSoundFile: null,
         currentVolume: 80,
         currentTime: null,
-        totalTime: null
+        totalTime: null,
+        seekPercentage: null
     }
 });   
 
@@ -53,91 +54,42 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
             PlayerVariables.currentSoundFile.pause();
         },
         
-        updateSeekBarWhileSongPlays: function(){
+        updateSeekBarWhileSongPlays: function(calculateSeekPercentage){
             if(PlayerVariables.currentSoundFile){
                 PlayerVariables.currentSoundFile.bind('timeupdate', function(event){
                     var seekBarFillRatio = this.getTime() / this.getDuration();
-//                  updateSeekPercentage($seekBar, seekBarFillRatio);
+                    
+                    // Problem: How do I properly get calculateSeekPercentage into the binding?
+                    PlayerVariables.seekPercentage = calculateSeekPercentage(seekBarFillRatio);
                     PlayerVariables.currentTime = buzz.toTimer(this.getTime());
                     PlayerVariables.totalTime = buzz.toTimer(this.getDuration());
-                    console.log(PlayerVariables.totalTime);
+                    console.log(PlayerVariables.seekPercentage);
                 });
+                
             }            
+        },
+        
+        calculateSeekPercentage: function(seekBarFillRatio){
+            var offsetXPercent = seekBarFillRatio *100;
+            offsetXPercent = Math.max(0, offsetXPercent);
+            offsetXPercent = Math.min(100, offsetXPercent);
+            var percentageString = '"' + offsetXPercent + '%' + '"';
+            console.log(percentageString);
+            return percentageString;
         }
-    }
-}]);
-
-/////////////////
-
-
-//var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
+        
+//    var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
 //    var offsetXPercent = seekBarFillRatio * 100;
 //
 //    offsetXPercent = Math.max(0, offsetXPercent);
 //    offsetXPercent = Math.min(100, offsetXPercent);
 // 
 //    var percentageString = offsetXPercent + '%';
+    
 //    $seekBar.find('.fill').width(percentageString);
 //    $seekBar.find('.thumb').css({left: percentageString});
 // };
 //
-//
-//var setupSeekBars = function(){
-//    var $seekBars = $('.player-bar .seek-bar');
-//    
-//    $seekBars.click(function(event){
-//            var offsetX = event.pageX - $(this).offset().left;
-//            var barWidth = $(this).width();
-//            var seekBarFillRatio = offsetX / barWidth;
-//        
-//        if ($(this).parent().attr('class') == 'seek-control'){
-//            seek(seekBarFillRatio * currentSoundFile.getDuration());
-//        }  else {
-//            setVolume(seekBarFillRatio * 100);
-//        }
-//        
-//        updateSeekPercentage($(this), seekBarFillRatio);        
-//    });
-//    
-//    $seekBars.find('.thumb').mousedown(function(event){
-//        var $seekBar = $(this).parent();
-//        
-//        $(document).bind('mousemove.thumb', function(event){
-//            var offsetX = event.pageX - $seekBar.offset().left;
-//            var barWidth = $seekBar.width();
-//            var seekBarFillRatio = offsetX / barWidth; 
-//            
-//            if ($(this).parent().attr('class') == 'seek-control'){
-//            seek(seekBarFillRatio * currentSoundFile.getDuration());
-//            }  else {
-//            setVolume(seekBarFillRatio);
-//            }
-//            
-//            updateSeekPercentage($seekBar, seekBarFillRatio);
-//        });
-//        
-//        $(document).bind('mouseup.thumb', function() {
-//            $(document).unbind('mousemove.thumb');
-//            $(document).unbind('mouseup.thumb');
-//        });
-//    });
-//};
-
-//
-//var filterTimeCode = function(timeInSeconds){
-//    var float = parseFloat(timeInSeconds, 10);
-//    var min = Math.floor(float / 60);
-//    var sec = float - (min*60);
-//    
-//    if (min < 10) {min = '0' + min}
-//    if (sec < 10) {sec = '0' + sec}
-//    
-//    return min + ':' + sec; 
-//    
-//};
-
-
-//
-
-//
+    }
+}]);
 

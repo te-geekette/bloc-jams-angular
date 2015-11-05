@@ -40,10 +40,7 @@
                 <h2 class="artist-song-mobile">{{ PlayerVariables.currentSongFromAlbum.name + " " + artist; }}</h2>
                 <h3 class="artist-name">{{ PlayerVariables.currentAlbum.artist }}</h3>
                 <div class="seek-control">
-                    <div class="seek-bar">
-                        <div class="fill"></div>
-                        <div class="thumb"></div>
-                    </div>
+                    <my-slider></my-slider>
                     <div class="current-time">{{ PlayerVariables.currentTime }}</div>
                     <div class="total-time">{{ PlayerVariables.totalTime }}</div>
                 </div>

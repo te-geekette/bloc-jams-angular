@@ -117,7 +117,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
             $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = false;
             $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = true;
             
-            SongPlayer.updateSeekBarWhileSongPlays();            
+            SongPlayer.updateSeekBarWhileSongPlays(SongPlayer.calculateSeekPercentage);            
             
         } else if (PlayerVariables.currentSoundFile.isPaused()) {
             SongPlayer.play(PlayerVariables.currentlyPlayingSongNumber);
@@ -185,10 +185,117 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
 
     };
  
-    // Assignment 6: Functions to update the seek bars 
+
     
 }]);
     
+blocJamsModule.directive('mySlider', ['SongPlayer', 'PlayerVariables' , function(SongPlayer, PlayerVariables){
+    return {
+        templateUrl: '/templates/seek.html',
+        restrict: 'E',
+        replace: true,
+        scope: {},
+        link: function(scope, element, attribute){
+            scope.PlayerVariables = PlayerVariables;
+            
+            // PROBLEM: How do I get this to listen to the Variable in PlayerVariables?
+            scope.seekFillStyle = { width: PlayerVariables.seekPercentage };
+            scope.seekThumbStyle = { left: '20%' };
+            
+            
+            // PROBLEM: offsetLeft and width are giving the wrong values -- result= NaN
+            scope.onClick = function($event){
+                var offsetX = $event.pageX - $event.offsetLeft;
+                var barWidth = $event.width;
+                var seekBarFillRatio = offsetX / barWidth;
+                
+                SongPlayer.calculateSeekPercentage(seekBarFillRatio);
+                console.log(PlayerVariables.seekPercentage);
+//                SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
+            };
+            
+            scope.onMouseDown = function(){};
+        }
+    }
+}]);
+
+/////////////////
+
+
+//var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
+//    var offsetXPercent = seekBarFillRatio * 100;
+//
+//    offsetXPercent = Math.max(0, offsetXPercent);
+//    offsetXPercent = Math.min(100, offsetXPercent);
+// 
+//    var percentageString = offsetXPercent + '%';
+    
+//    $seekBar.find('.fill').width(percentageString);
+//    $seekBar.find('.thumb').css({left: percentageString});
+// };
+//
+    
+    // ng-click="seekStyle" --> seekStyle ist auch eine Directive? oder doch mit ngClass?
+//
+//var setupSeekBars = function(){
+//    var $seekBars = $('.player-bar .seek-bar');
+//    
+//    $seekBars.click(function(event){
+//            var offsetX = event.pageX - $(this).offset().left;
+//            var barWidth = $(this).width();
+//            var seekBarFillRatio = offsetX / barWidth;
+//        
+//        if ($(this).parent().attr('class') == 'seek-control'){
+//            seek(seekBarFillRatio * currentSoundFile.getDuration());
+//        }  else {
+//            setVolume(seekBarFillRatio * 100);
+//        }
+//        
+//        updateSeekPercentage($(this), seekBarFillRatio);        
+//    });
+//    
+//    $seekBars.find('.thumb').mousedown(function(event){
+//        var $seekBar = $(this).parent();
+//        
+//        $(document).bind('mousemove.thumb', function(event){
+//            var offsetX = event.pageX - $seekBar.offset().left;
+//            var barWidth = $seekBar.width();
+//            var seekBarFillRatio = offsetX / barWidth; 
+//            
+//            if ($(this).parent().attr('class') == 'seek-control'){
+//            seek(seekBarFillRatio * currentSoundFile.getDuration());
+//            }  else {
+//            setVolume(seekBarFillRatio);
+//            }
+//            
+//            updateSeekPercentage($seekBar, seekBarFillRatio);
+//        });
+//        
+//        $(document).bind('mouseup.thumb', function() {
+//            $(document).unbind('mousemove.thumb');
+//            $(document).unbind('mouseup.thumb');
+//        });
+//    });
+//};
+
+//
+//var filterTimeCode = function(timeInSeconds){
+//    var float = parseFloat(timeInSeconds, 10);
+//    var min = Math.floor(float / 60);
+//    var sec = float - (min*60);
+//    
+//    if (min < 10) {min = '0' + min}
+//    if (sec < 10) {sec = '0' + sec}
+//    
+//    return min + ':' + sec; 
+//    
+//};
+
+
+//
+
+//
+
 
 
 

@@ -194,24 +194,17 @@ blocJamsModule.directive('mySlider', ['SongPlayer', 'PlayerVariables' , function
         templateUrl: '/templates/seek.html',
         restrict: 'E',
         replace: true,
-        scope: {},
-        link: function(scope, element, attribute){
-            scope.PlayerVariables = PlayerVariables;
+        scope: true,
+        link: function(scope, element, attribute){ 
             
-            // PROBLEM: How do I get this to listen to the Variable in PlayerVariables?
-            scope.seekFillStyle = { width: PlayerVariables.seekPercentage };
-            scope.seekThumbStyle = { left: '20%' };
-            
-            
-            // PROBLEM: offsetLeft and width are giving the wrong values -- result= NaN
             scope.onClick = function($event){
-                var offsetX = $event.pageX - $event.offsetLeft;
-                var barWidth = $event.width;
+                var offsetX = $event.offsetX - $event.target.offsetLeft;
+                var barWidth = $event.target.offsetWidth;
+                console.log(offsetX, barWidth);
                 var seekBarFillRatio = offsetX / barWidth;
-                
                 SongPlayer.calculateSeekPercentage(seekBarFillRatio);
-                console.log(PlayerVariables.seekPercentage);
-//                SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
+
+                SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
             };
             
             scope.onMouseDown = function(){};

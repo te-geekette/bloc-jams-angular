@@ -2,9 +2,11 @@ var blocJamsServices = angular.module('blocJamsServices', []);
 
 blocJamsServices.service('PlayerVariables', function(){
     return {
+        albumList: [albumPicasso, albumMarconi],
+        clickedAlbum: null, 
         currentlyPlayingSongNumber: null,
         previousSongNumber: null,
-        currentAlbum: albumPicasso,
+        currentAlbum: null,
         currentSongFromAlbum: null,
         currentSoundFile: null,
         currentVolume: 80,

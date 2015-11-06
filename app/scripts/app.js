@@ -33,21 +33,70 @@ blocJamsModule.controller('LandingController', ['$scope',function($scope){
     $scope.tagline = "Turn the music up!";
 }]);
 
-blocJamsModule.controller('CollectionController', ['$scope', function($scope){
-    $scope.albumList = [albumPicasso, albumMarconi];
+blocJamsModule.directive('ScrollLanding', function($window){
+    return {
+        link: function (scope, element, attrs){
+            angular.element($window).bind('scroll', function(){
+                console.log(this.scrollTop);
+                if(this.pageYOffset >= 300) {
+                    scope.reveal = true;
+                } else {
+                    scope.reveal = false;
+                }
+                scope.$apply();
+            });
+        }
+    }
+});
+
+
+//var animatePoints = function() {
+//    var revealPoint = function() {
+//        $(this).css({
+//            opacity: 1,
+//            transform: 'scaleX(1) translateY(0)'
+//        });
+//    };
+//    $.each($('.point'), revealPoint);
+//
+//}; 
+//
+//$(window).load(function () {
+//    if ($(window).height() > 950) {
+//        animatePoints();
+//    }
+//    
+//    var scrollDistance = $('.selling-points').offset().top - $(window).height() + 200;
+//    
+//    $(window).scroll(function(event){
+//        if ($(window).scrollTop() >= scrollDistance) {
+//            animatePoints();
+//        }
+//    });
+//});
+
+
+
+
+blocJamsModule.controller('CollectionController', ['$scope', 'PlayerVariables', function($scope, PlayerVariables){
+    $scope.albumList = PlayerVariables.albumList;
     for ( var i = 0; i <= 4; i++ ) {
         $scope.albumList.push(angular.copy(albumPicasso));
         $scope.albumList.push(angular.copy(albumMarconi));
     } 
+    $scope.updateSelectedAlbum = function(album){
+        PlayerVariables.currentAlbum = album; 
+        console.log(PlayerVariables.currentAlbum);
+    };
 }]);
 
 blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVariables', function($scope, SongPlayer, PlayerVariables){
     
-    $scope.name = albumPicasso.name;
-    $scope.artist = albumPicasso.artist;
-    $scope.yearLabel = albumPicasso.year + " " + albumPicasso.label;
-    $scope.albumArtUrl = albumPicasso.albumArtUrl;
-    $scope.songs = albumPicasso.songs;
+    $scope.name = PlayerVariables.currentAlbum.name;
+    $scope.artist = PlayerVariables.currentAlbum.artist;
+    $scope.yearLabel = PlayerVariables.currentAlbum.year + " " + PlayerVariables.currentAlbum.label;
+    $scope.albumArtUrl = PlayerVariables.currentAlbum.albumArtUrl;
+    $scope.songs = PlayerVariables.currentAlbum.songs;
     
     $scope.PlayerVariables = PlayerVariables;
     
@@ -244,6 +293,10 @@ blocJamsModule.filter("timeFormat", function(){
     }
 });
 
+
+
+
+
 /////////////////
 
 
@@ -302,24 +355,6 @@ blocJamsModule.filter("timeFormat", function(){
 //        });
 //    });
 //};
-
-//
-//var filterTimeCode = function(timeInSeconds){
-//    var float = parseFloat(timeInSeconds, 10);
-//    var min = Math.floor(float / 60);
-//    var sec = float - (min*60);
-//    
-//    if (min < 10) {min = '0' + min}
-//    if (sec < 10) {sec = '0' + sec}
-//    
-//    return min + ':' + sec; 
-//    
-//};
-
-
-//
-
-//
 
 
 

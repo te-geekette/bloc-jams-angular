@@ -8,6 +8,8 @@ blocJamsServices.service('PlayerVariables', function(){
         currentSongFromAlbum: null,
         currentSoundFile: null,
         currentVolume: 80,
+        
+        // PROBLEM: How can I get this to update constantly? 
         currentTime: null,
         totalTime: null,
         seekPercentage: null
@@ -20,9 +22,9 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
         setSong: function(songNumber){
             if (PlayerVariables.currentSoundFile){
                 PlayerVariables.currentSoundFile.stop();
+                PlayerVariables.previousSongNumber = PlayerVariables.currentlyPlayingSongNumber;
                 }
             PlayerVariables.currentlyPlayingSongNumber = songNumber;
-            PlayerVariables.previousSongNumber = PlayerVariables.currentlyPlayingSongNumber;
             PlayerVariables.currentSongFromAlbum = PlayerVariables.currentAlbum.songs[songNumber -1];
             PlayerVariables.currentSoundFile = new buzz.sound(PlayerVariables.currentSongFromAlbum.audioUrl, {
                 formats: ['mp3'],
@@ -45,7 +47,7 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
         
         play: function(songNumber){
             this.setSong(songNumber);
-            this.updateSeekBarWhileSongPlays();
+            this.updateSeekBarWhileSongPlays(this.calculateSeekPercentage);
             PlayerVariables.currentSoundFile.play();
             
         },
@@ -59,11 +61,16 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
                 PlayerVariables.currentSoundFile.bind('timeupdate', function(event){
                     var seekBarFillRatio = this.getTime() / this.getDuration();
                     
-                    // Problem: How do I properly get calculateSeekPercentage into the binding?
+                    // Problem: Why is the seekPercentage variable not updating the view??
                     PlayerVariables.seekPercentage = calculateSeekPercentage(seekBarFillRatio);
-                    PlayerVariables.currentTime = buzz.toTimer(this.getTime());
+                    // Problem: How do I make sure that only the time seek bar is updated but not the volume one? 
+                    
+                    // Problem: Why are the time variables not updated in the view??
+                    PlayerVariables.currentTime = buzz.toTimer(this.getTime());;  
                     PlayerVariables.totalTime = buzz.toTimer(this.getDuration());
-                    console.log(PlayerVariables.seekPercentage);
+                    
+                    // The log shows that both variables are changing constantly. Only the view doesn't react properly. 
+                    console.log(PlayerVariables.seekPercentage, PlayerVariables.currentTime);
                 });
                 
             }            
@@ -73,8 +80,8 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
             var offsetXPercent = seekBarFillRatio *100;
             offsetXPercent = Math.max(0, offsetXPercent);
             offsetXPercent = Math.min(100, offsetXPercent);
-            var percentageString = '"' + offsetXPercent + '%' + '"';
-            console.log(percentageString);
+            var percentageString = offsetXPercent + '%';
+        
             return percentageString;
         }
         

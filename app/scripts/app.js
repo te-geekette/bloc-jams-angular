@@ -88,9 +88,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
  
         } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber) {
             SongPlayer.play(songNumber);
-            $scope.songs[PlayerVariables.previousSongNumber-1].showNumber = true;
-            $scope.songs[PlayerVariables.previousSongNumber-1].showPlay = false;
-            $scope.songs[PlayerVariables.previousSongNumber-1].showPause = false;
+            this.updateSongButtons(PlayerVariables.previousSongNumber-1, true, false, false);          
             
             song.showNumber = false;
             song.showPlay = false;
@@ -113,23 +111,17 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         
         if (PlayerVariables.currentSongFromAlbum === null) {
             SongPlayer.play(1);
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showNumber = false;
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = false;
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = true;
+            this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, false, true); 
             
             SongPlayer.updateSeekBarWhileSongPlays(SongPlayer.calculateSeekPercentage);            
             
         } else if (PlayerVariables.currentSoundFile.isPaused()) {
             SongPlayer.play(PlayerVariables.currentlyPlayingSongNumber);
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showNumber = false;
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = false;
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = true;
+            this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, false, true);          
             
         } else if (PlayerVariables.currentSoundFile) {
             SongPlayer.pause(PlayerVariables.currentlyPlayingSongNumber);
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showNumber = false;
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPlay = true;
-            $scope.songs[PlayerVariables.currentlyPlayingSongNumber-1].showPause = false;            
+            this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, true, false);          
         }
         $scope.togglePlayButtonInBar();
     };
@@ -144,23 +136,18 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         } else {
             var previousSongNumber = PlayerVariables.currentlyPlayingSongNumber - 1; 
         }
-        
-        // Set the last song back to it's song number
-        if(PlayerVariables.previousSongNumber){
-            $scope.songs[PlayerVariables.previousSongNumber -1].showNumber = true;
-            $scope.songs[PlayerVariables.previousSongNumber -1].showPlay = false;
-            $scope.songs[PlayerVariables.previousSongNumber -1].showPause = false;
-        }
-        
+           
         // Update the current song variables
         SongPlayer.play(previousSongNumber);
         SongPlayer.updateSeekBarWhileSongPlays();
         
+        // Set the last song back to it's song number
+        if(PlayerVariables.previousSongNumber){
+            this.updateSongButtons(PlayerVariables.previousSongNumber -1, true, false, false);
+        }
+        
         // Set the play button for the previous song
-        $scope.songs[previousSongNumber-1].showNumber = false;
-        $scope.songs[previousSongNumber-1].showPlay = false;
-        $scope.songs[previousSongNumber-1].showPause = true;
-    
+        this.updateSongButtons(previousSongNumber-1, false, false, true);
     };
 
     $scope.playNextSong = function(){
@@ -169,20 +156,23 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         } else {
             var nextSongNumber = 1; 
         }
-        // Set the last song back to it's song number
-        if(PlayerVariables.previousSongNumber){
-            $scope.songs[PlayerVariables.previousSongNumber -1].showNumber = true;
-            $scope.songs[PlayerVariables.previousSongNumber -1].showPlay = false;
-            $scope.songs[PlayerVariables.previousSongNumber -1].showPause = false;
-        }
+
         // Update the current song variables
         SongPlayer.play(nextSongNumber);        
         
+        // Set the last song back to it's song number
+        if(PlayerVariables.previousSongNumber){
+            this.updateSongButtons(PlayerVariables.previousSongNumber -1, true, false, false);
+        }
         // Set the play button for the next song
-        $scope.songs[nextSongNumber-1].showNumber = false;
-        $scope.songs[nextSongNumber-1].showPlay = false;
-        $scope.songs[nextSongNumber-1].showPause = true;
+        this.updateSongButtons(nextSongNumber-1, false, false, true);
 
+    };
+    
+    $scope.updateSongButtons = function(songIndex, numberBoolean, playBoolean, pauseBoolean){
+        $scope.songs[songIndex].showNumber = numberBoolean;
+        $scope.songs[songIndex].showPlay = playBoolean;
+        $scope.songs[songIndex].showPause = pauseBoolean;
     };
  
 
@@ -197,17 +187,45 @@ blocJamsModule.directive('mySlider', ['SongPlayer', 'PlayerVariables' , function
         scope: true,
         link: function(scope, element, attribute){ 
             
+            
             scope.onClick = function($event){
                 var offsetX = $event.offsetX - $event.target.offsetLeft;
                 var barWidth = $event.target.offsetWidth;
-                console.log(offsetX, barWidth);
                 var seekBarFillRatio = offsetX / barWidth;
-                SongPlayer.calculateSeekPercentage(seekBarFillRatio);
-
-                SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
+                
+                if ($event.target.parentElement.classList.contains("seek-control")){
+                    SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
+                } else {
+                    SongPlayer.setVolume(seekBarFillRatio *100);
+                }
+                PlayerVariables.seekPercentage = SongPlayer.calculateSeekPercentage(seekBarFillRatio);
+                // Problem: Why is this again only happening at the second click?
             };
             
-            scope.onMouseDown = function(){};
+            scope.onMouseDown = function($event){
+                
+                //Problem: I really don't get this binding and unbinding thing ...
+                
+                window.bind('mousemove.thumb', function($event){
+                    var offsetX = $event.offsetX - $event.target.offsetLeft;
+                    var barWidth = $event.target.offsetWidth;
+                    var seekBarFillRatio = offsetX / barWidth;
+                    
+                    if ($event.target.parentElement.classList.contains("seek-control")){
+                        SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
+                    } else {
+                        SongPlayer.setVolume(seekBarFillRatio *100);
+                    }
+                    
+                    PlayerVariables.seekPercentage = SongPlayer.calculateSeekPercentage(seekBarFillRatio);
+                });
+                            
+                window.bind('mouseup.thumb', function(){
+                    window.unbind('mousemove.thumb');
+                    window.unbind('mouseup.thumb');
+                });
+            
+            };                
         }
     }
 }]);

@@ -1,5 +1,6 @@
-<div class="seek-bar" ng-click="onClick($event)" ng-mousedown="">
+<div class="seek-bar" ng-click="onClick($event)" ng-mousedown="onMousedown($event)">
+    
 <!--    PROBLEM: How do I get this to listen to the Variable in PlayerVariables?-->
-    <div class="fill" ng-style="{ width: PlayerVariables.seekPercentage }"></div>
-    <div class="thumb" ng-style="{ width: PlayerVariables.seekPercentage }"></div>
+    <div class="fill" ng-style="{ width: '{{ PlayerVariables.seekPercentage }}' }"></div>
+    <div class="thumb" ng-style="{ left: '{{ PlayerVariables.seekPercentage }}' }"></div>
 </div>

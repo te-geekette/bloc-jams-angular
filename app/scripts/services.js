@@ -10,11 +10,10 @@ blocJamsServices.service('PlayerVariables', function(){
         currentSongFromAlbum: null,
         currentSoundFile: null,
         currentVolume: 80,
-        
-        // PROBLEM: How can I get this to update constantly? 
         currentTime: null,
         totalTime: null,
-        seekPercentage: null
+        seekPercentage: null,
+        volumePercentage: null
     }
 });   
 
@@ -44,37 +43,32 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
         seek: function(time){
             if(PlayerVariables.currentSoundFile) {
                 PlayerVariables.currentSoundFile.setTime(time);
+                PlayerVariables.currentSoundFile.play();
             }
         },
         
-        play: function(songNumber){
+        play: function(songNumber, $scope){
             this.setSong(songNumber);
-            this.updateSeekBarWhileSongPlays(this.calculateSeekPercentage);
-            PlayerVariables.currentSoundFile.play();
-            
+            this.updateSeekBarWhileSongPlays(this.calculateSeekPercentage, $scope);
+            PlayerVariables.currentSoundFile.play(); 
         },
         
         pause: function(){
             PlayerVariables.currentSoundFile.pause();
         },
         
-        updateSeekBarWhileSongPlays: function(calculateSeekPercentage){
+        updateSeekBarWhileSongPlays: function(calculateSeekPercentage, $scope){
             if(PlayerVariables.currentSoundFile){
                 PlayerVariables.currentSoundFile.bind('timeupdate', function(event){
                     var seekBarFillRatio = this.getTime() / this.getDuration();
                     
-                    // Problem: Why is the seekPercentage variable not updating the view??
                     PlayerVariables.seekPercentage = calculateSeekPercentage(seekBarFillRatio);
-                    // Problem: How do I make sure that only the time seek bar is updated but not the volume one? 
                     
-                    // Problem: Why are the time variables not updated in the view??
                     PlayerVariables.currentTime = buzz.toTimer(this.getTime());;  
                     PlayerVariables.totalTime = buzz.toTimer(this.getDuration());
-                    
-                    // The log shows that both variables are changing constantly. Only the view doesn't react properly. 
-                    console.log(PlayerVariables.seekPercentage, PlayerVariables.currentTime);
+    
+                    $scope.$apply();
                 });
-                
             }            
         },
         
@@ -82,23 +76,10 @@ blocJamsServices.service('SongPlayer', ['PlayerVariables', function(PlayerVariab
             var offsetXPercent = seekBarFillRatio *100;
             offsetXPercent = Math.max(0, offsetXPercent);
             offsetXPercent = Math.min(100, offsetXPercent);
-            var percentageString = offsetXPercent + '%';
+            var percentageString = Math.ceil(offsetXPercent) + '%';
         
             return percentageString;
         }
-        
-//    var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
-//    var offsetXPercent = seekBarFillRatio * 100;
-//
-//    offsetXPercent = Math.max(0, offsetXPercent);
-//    offsetXPercent = Math.min(100, offsetXPercent);
-// 
-//    var percentageString = offsetXPercent + '%';
-    
-//    $seekBar.find('.fill').width(percentageString);
-//    $seekBar.find('.thumb').css({left: percentageString});
-// };
-//
     }
 }]);
 

@@ -33,12 +33,13 @@ blocJamsModule.controller('LandingController', ['$scope',function($scope){
     $scope.tagline = "Turn the music up!";
 }]);
 
-blocJamsModule.directive('ScrollLanding', function($window){
+// Problem: Not really working yet. I guess something with the pageYOffset is wrong
+blocJamsModule.directive('scrollLanding', function($window){
     return {
+        restrict: 'A',
         link: function (scope, element, attrs){
             angular.element($window).bind('scroll', function(){
-                console.log(this.scrollTop);
-                if(this.pageYOffset >= 300) {
+                if(this.pageYOffset >= 10) {
                     scope.reveal = true;
                 } else {
                     scope.reveal = false;
@@ -48,35 +49,6 @@ blocJamsModule.directive('ScrollLanding', function($window){
         }
     }
 });
-
-
-//var animatePoints = function() {
-//    var revealPoint = function() {
-//        $(this).css({
-//            opacity: 1,
-//            transform: 'scaleX(1) translateY(0)'
-//        });
-//    };
-//    $.each($('.point'), revealPoint);
-//
-//}; 
-//
-//$(window).load(function () {
-//    if ($(window).height() > 950) {
-//        animatePoints();
-//    }
-//    
-//    var scrollDistance = $('.selling-points').offset().top - $(window).height() + 200;
-//    
-//    $(window).scroll(function(event){
-//        if ($(window).scrollTop() >= scrollDistance) {
-//            animatePoints();
-//        }
-//    });
-//});
-
-
-
 
 blocJamsModule.controller('CollectionController', ['$scope', 'PlayerVariables', function($scope, PlayerVariables){
     $scope.albumList = PlayerVariables.albumList;
@@ -130,13 +102,13 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         var songNumber = $scope.songs.indexOf(song)+1;
 
         if (PlayerVariables.currentlyPlayingSongNumber == null){
-            SongPlayer.play(songNumber);
+            SongPlayer.play(songNumber, $scope);
             song.showNumber = false;
             song.showPlay = false; 
             song.showPause = true;
  
         } else if (PlayerVariables.currentlyPlayingSongNumber != songNumber) {
-            SongPlayer.play(songNumber);
+            SongPlayer.play(songNumber, $scope);
             this.updateSongButtons(PlayerVariables.previousSongNumber-1, true, false, false);          
             
             song.showNumber = false;
@@ -145,7 +117,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
 
         } else if (PlayerVariables.currentlyPlayingSongNumber == songNumber) {
             if(PlayerVariables.currentSoundFile.isPaused()){
-                SongPlayer.play(songNumber);
+                PlayerVariables.currentSoundFile.play();
                 song.showPause = true;
                 song.showPlay = false; 
             } else {
@@ -159,13 +131,13 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
     $scope.playSongFromBar = function() {
         
         if (PlayerVariables.currentSongFromAlbum === null) {
-            SongPlayer.play(1);
+            SongPlayer.play(1, $scope);
             this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, false, true); 
             
-            SongPlayer.updateSeekBarWhileSongPlays(SongPlayer.calculateSeekPercentage);            
+            SongPlayer.updateSeekBarWhileSongPlays(SongPlayer.calculateSeekPercentage, $scope);            
             
         } else if (PlayerVariables.currentSoundFile.isPaused()) {
-            SongPlayer.play(PlayerVariables.currentlyPlayingSongNumber);
+            PlayerVariables.currentSoundFile.play();
             this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, false, true);          
             
         } else if (PlayerVariables.currentSoundFile) {
@@ -187,8 +159,8 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         }
            
         // Update the current song variables
-        SongPlayer.play(previousSongNumber);
-        SongPlayer.updateSeekBarWhileSongPlays();
+        SongPlayer.play(previousSongNumber, $scope);
+//        SongPlayer.updateSeekBarWhileSongPlays(,$scope);
         
         // Set the last song back to it's song number
         if(PlayerVariables.previousSongNumber){
@@ -207,7 +179,7 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         }
 
         // Update the current song variables
-        SongPlayer.play(nextSongNumber);        
+        SongPlayer.play(nextSongNumber, $scope);        
         
         // Set the last song back to it's song number
         if(PlayerVariables.previousSongNumber){
@@ -233,45 +205,78 @@ blocJamsModule.directive('mySlider', ['SongPlayer', 'PlayerVariables' , function
         templateUrl: '/templates/seek.html',
         restrict: 'E',
         replace: true,
-        scope: true,
+        // Problem: I cannot set a scope here otherwise the seek bar won't update while song is playing 
+        // But now I can't control the volume seek bar. If that however has no scope it overwrites mySlider
         link: function(scope, element, attribute){ 
-            
             
             scope.onClick = function($event){
                 var offsetX = $event.offsetX - $event.target.offsetLeft;
                 var barWidth = $event.target.offsetWidth;
                 var seekBarFillRatio = offsetX / barWidth;
                 
-                if ($event.target.parentElement.classList.contains("seek-control")){
-                    SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
-                } else {
-                    SongPlayer.setVolume(seekBarFillRatio *100);
-                }
+                SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
+                PlayerVariables.currentSongFromAlbum.showNumber = false;
+                PlayerVariables.currentSongFromAlbum.showPlay = false;
+                PlayerVariables.currentSongFromAlbum.showPause = true;
+                
                 PlayerVariables.seekPercentage = SongPlayer.calculateSeekPercentage(seekBarFillRatio);
-                // Problem: Why is this again only happening at the second click?
             };
             
             scope.onMouseDown = function($event){
-                
-                //Problem: I really don't get this binding and unbinding thing ...
-                
-                window.bind('mousemove.thumb', function($event){
+                                
+                $event.target.bind('mousemove.thumb', function($event){
                     var offsetX = $event.offsetX - $event.target.offsetLeft;
                     var barWidth = $event.target.offsetWidth;
                     var seekBarFillRatio = offsetX / barWidth;
                     
-                    if ($event.target.parentElement.classList.contains("seek-control")){
-                        SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
-                    } else {
-                        SongPlayer.setVolume(seekBarFillRatio *100);
-                    }
-                    
+                    SongPlayer.seek(seekBarFillRatio * PlayerVariables.currentSoundFile.getDuration() );
                     PlayerVariables.seekPercentage = SongPlayer.calculateSeekPercentage(seekBarFillRatio);
+                    scope.$apply();
                 });
                             
-                window.bind('mouseup.thumb', function(){
-                    window.unbind('mousemove.thumb');
-                    window.unbind('mouseup.thumb');
+                $event.target.bind('mouseup.thumb', function(){
+                    $event.target.unbind('mousemove.thumb');
+                    $event.target.unbind('mouseup.thumb');
+                    scope.$apply();
+                });
+            
+            };                
+        }
+    }
+}]);
+
+blocJamsModule.directive('myVolumeSlider', ['SongPlayer', 'PlayerVariables' , function(SongPlayer, PlayerVariables){
+    return {
+        templateUrl: '/templates/seekVolume.html',
+        restrict: 'E',
+        replace: true,
+        scope: {},
+        link: function(scope, element, attribute){ 
+            
+            scope.onClick = function($event){
+                var barWidth = $event.target.offsetWidth;
+                var seekBarFillRatio = $event.offsetX / barWidth;
+
+                SongPlayer.setVolume(seekBarFillRatio *100);
+                PlayerVariables.volumePercentage = SongPlayer.calculateSeekPercentage(seekBarFillRatio);
+                
+            };
+            
+            scope.onMouseDown = function($event){
+                                
+                $event.target.bind('mousemove.thumb', function($event){
+                    var barWidth = $event.target.offsetWidth;
+                    var seekBarFillRatio = $event.offsetX / barWidth;
+                    
+                    SongPlayer.setVolume(seekBarFillRatio *100);
+                    PlayerVariables.volumePercentage = SongPlayer.calculateSeekPercentage(seekBarFillRatio);
+                    scope.$apply();
+                });
+                            
+                $event.target.bind('mouseup.thumb', function(){
+                    $event.target.unbind('mousemove.thumb');
+                    $event.target.unbind('mouseup.thumb');
+                    scope.$apply();
                 });
             
             };                
@@ -292,70 +297,6 @@ blocJamsModule.filter("timeFormat", function(){
         return min + ':' + sec;
     }
 });
-
-
-
-
-
-/////////////////
-
-
-//var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
-//    var offsetXPercent = seekBarFillRatio * 100;
-//
-//    offsetXPercent = Math.max(0, offsetXPercent);
-//    offsetXPercent = Math.min(100, offsetXPercent);
-// 
-//    var percentageString = offsetXPercent + '%';
-    
-//    $seekBar.find('.fill').width(percentageString);
-//    $seekBar.find('.thumb').css({left: percentageString});
-// };
-//
-    
-    // ng-click="seekStyle" --> seekStyle ist auch eine Directive? oder doch mit ngClass?
-//
-//var setupSeekBars = function(){
-//    var $seekBars = $('.player-bar .seek-bar');
-//    
-//    $seekBars.click(function(event){
-//            var offsetX = event.pageX - $(this).offset().left;
-//            var barWidth = $(this).width();
-//            var seekBarFillRatio = offsetX / barWidth;
-//        
-//        if ($(this).parent().attr('class') == 'seek-control'){
-//            seek(seekBarFillRatio * currentSoundFile.getDuration());
-//        }  else {
-//            setVolume(seekBarFillRatio * 100);
-//        }
-//        
-//        updateSeekPercentage($(this), seekBarFillRatio);        
-//    });
-//    
-//    $seekBars.find('.thumb').mousedown(function(event){
-//        var $seekBar = $(this).parent();
-//        
-//        $(document).bind('mousemove.thumb', function(event){
-//            var offsetX = event.pageX - $seekBar.offset().left;
-//            var barWidth = $seekBar.width();
-//            var seekBarFillRatio = offsetX / barWidth; 
-//            
-//            if ($(this).parent().attr('class') == 'seek-control'){
-//            seek(seekBarFillRatio * currentSoundFile.getDuration());
-//            }  else {
-//            setVolume(seekBarFillRatio);
-//            }
-//            
-//            updateSeekPercentage($seekBar, seekBarFillRatio);
-//        });
-//        
-//        $(document).bind('mouseup.thumb', function() {
-//            $(document).unbind('mousemove.thumb');
-//            $(document).unbind('mouseup.thumb');
-//        });
-//    });
-//};
-
 
 
 

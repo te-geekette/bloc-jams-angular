@@ -230,6 +230,20 @@ blocJamsModule.directive('mySlider', ['SongPlayer', 'PlayerVariables' , function
     }
 }]);
 
+
+blocJamsModule.filter("timeFormat", function(){
+    return function(timeinseconds){
+        var float = parseFloat(timeinseconds, 10);
+        var min = Math.floor(float / 60);
+        var sec = float - (min*60); 
+        
+        if (min < 10) {min = '0' + min}
+        if (sec < 10) {sec = '0' + sec}
+        
+        return min + ':' + sec;
+    }
+});
+
 /////////////////
 
 

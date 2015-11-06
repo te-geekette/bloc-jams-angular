@@ -15,7 +15,7 @@
             <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="song.showPlay" data-song-number="' + {{ songs.indexOf(song)+1 }} + '"><a class="album-song-button"><span class="ion-play"></span></a></td>
             <td class="song-item-number" ng-click="playPauseSong(song)" ng-show="song.showPause" data-song-number="' + {{ songs.indexOf(song)+1 }} + '"><a class="album-song-button"><span class="ion-pause"></span></a></td>
             <td class="song-item-title">{{ song.name }}</td>
-            <td class="song-item-duration">{{ song.length }}</td>
+            <td class="song-item-duration">{{ song.length | timeFormat }}</td>
         </tr>
     </table>
 </main>

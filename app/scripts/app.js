@@ -103,6 +103,8 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
 
         if (PlayerVariables.currentlyPlayingSongNumber == null){
             SongPlayer.play(songNumber, $scope);
+            PlayerVariables.volumePercentage = SongPlayer.calculateSeekPercentage(PlayerVariables.currentVolume / 100);
+            console.log(PlayerVariables.volumePercentage);
             song.showNumber = false;
             song.showPlay = false; 
             song.showPause = true;
@@ -132,7 +134,8 @@ blocJamsModule.controller('AlbumController', ['$scope', 'SongPlayer', 'PlayerVar
         
         if (PlayerVariables.currentSongFromAlbum === null) {
             SongPlayer.play(1, $scope);
-            this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, false, true); 
+            this.updateSongButtons(PlayerVariables.currentlyPlayingSongNumber-1, false, false, true);
+            PlayerVariables.volumePercentage = SongPlayer.calculateSeekPercentage(PlayerVariables.currentVolume / 100);
             
             SongPlayer.updateSeekBarWhileSongPlays(SongPlayer.calculateSeekPercentage, $scope);            
             
@@ -205,8 +208,6 @@ blocJamsModule.directive('mySlider', ['SongPlayer', 'PlayerVariables' , function
         templateUrl: '/templates/seek.html',
         restrict: 'E',
         replace: true,
-        // Problem: I cannot set a scope here otherwise the seek bar won't update while song is playing 
-        // But now I can't control the volume seek bar. If that however has no scope it overwrites mySlider
         link: function(scope, element, attribute){ 
             
             scope.onClick = function($event){
@@ -250,10 +251,9 @@ blocJamsModule.directive('myVolumeSlider', ['SongPlayer', 'PlayerVariables' , fu
         templateUrl: '/templates/seekVolume.html',
         restrict: 'E',
         replace: true,
-        scope: {},
         link: function(scope, element, attribute){ 
             
-            scope.onClick = function($event){
+            scope.onClickV = function($event){
                 var barWidth = $event.target.offsetWidth;
                 var seekBarFillRatio = $event.offsetX / barWidth;
 
@@ -262,7 +262,7 @@ blocJamsModule.directive('myVolumeSlider', ['SongPlayer', 'PlayerVariables' , fu
                 
             };
             
-            scope.onMouseDown = function($event){
+            scope.onMouseDownV = function($event){
                                 
                 $event.target.bind('mousemove.thumb', function($event){
                     var barWidth = $event.target.offsetWidth;
